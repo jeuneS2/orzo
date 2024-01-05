@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--
+    This file is part of Orzo.
+
+    Orzo is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Orzo is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Orzo. If not, see <https://www.gnu.org/licenses/>.
+
+    Copyright 2014 Wolfgang Puffitsch
+-->
+<html>
+  <head>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+    </style>
+  </head>
+  <body>
+    <main-app></main-app>
+  </body>
+  <script>
+const template = document.createElement('template');
+template.innerHTML = `
+ <style>
+   :host {
+        font-family: 'Roboto Mono', monospace;
+   }
+   button {
+        font-family: 'Roboto Mono', monospace;
+        border: 0px;
+   }
+   table {
+        border-collapse: collapse;
+   }
+ </style>
+ <div class="content">
+    <table>
+        <tr>
+            <td><button id='connect'>Connect</button></td>
+            <td><button id='startstop'>Start</button></td>
+            <td><button id='pauseunpause' disabled='true'>Unpause</button></td>
+        </tr>
+        <tr>
+          <td colspan="2"><table>
+            <tr>
+                <td>HR</td>
+                <td style="text-align: right"><span id='hr'>n/a</span></td>
+                <td style="text-align: right"><span id='hrm_bat' style="font-size: x-small"></span></td>
+            </tr>
+            <tr>
+                <td>active</td>
+                <td colspan="2" style="text-align: right"><span id='active'> - </span></td>
+            </tr>
+            <tr>
+                <td>elapsed</td>
+                <td colspan="2" style="text-align: right"><span id='elapsed'> - </span></td>
+            </tr>
+            <tr>
+                <td>time</td>
+                <td colspan="2" style="text-align: right"><span id='time'> - </span></td>
+            </tr>
+        </table>
+        </td></tr>
+    </table>
+</div>
+`;
+
+class MainApp extends HTMLElement {
+    #started
+    #startDate
+
+    #active
+    #activeDate
+    #activeTime
+
+    #timerID
+    #log
+
+    constructor() {
+        super();
+
+        const shadowRoot = this.attachShadow({mode: 'open'});
+        shadowRoot.appendChild(template.content.cloneNode(true));
+
+        this.doScan = this.doScan.bind(this);
+        this.doStartStop = this.doStartStop.bind(this);
+        this.doPauseUnpause = this.doPauseUnpause.bind(this);
+        this.onTimerTick = this.onTimerTick.bind(this);
+        this.onHRMNotify = this.onHRMNotify.bind(this);
+        this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
+
+        this.#timerID = setInterval(this.onTimerTick, 1000);
+        this.#started = false;
+    }
+
+    connectedCallback() {
+        this.shadowRoot.querySelector('#connect').addEventListener('click', this.doScan);
+        this.shadowRoot.querySelector('#startstop').addEventListener('click', this.doStartStop);
+        this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
+    }
+
+    disconnectedCallback() {
+    }
+
+    async doScan() {
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ services: ['heart_rate']}],
+            optionalServices: ['battery_service']
+        });
+
+        if (device) {
+            const server = await device.gatt.connect();
+
+            const service = await server.getPrimaryService('heart_rate');
+            const characteristic = await service.getCharacteristic('heart_rate_measurement');
+            if (characteristic.properties.notify) {
+                characteristic.addEventListener( "characteristicvaluechanged", this.onHRMNotify);
+                await characteristic.startNotifications();
+            }
+
+            try {
+                const service = await server.getPrimaryService('battery_service');
+                const characteristic = await service.getCharacteristic('battery_level');
+
+                const battery = (await characteristic.readValue()).getUint8(0);
+                this.setHRMBat(battery + '%');
+
+                characteristic.addEventListener('characteristicvaluechanged', this.HRMonBatteryChange);
+                await characteristic.startNotifications();
+            } catch(err) {
+                console.log("Error with battery service: ", err);
+            }
+
+        }
+    }
+
+    doStartStop() {
+        this.#started = !this.#started;
+        if (this.#started) {
+            this.shadowRoot.querySelector('#startstop').textContent = 'Stop';
+
+            this.#startDate = new Date();
+            this.#log = [];
+
+            this.shadowRoot.querySelector('#pauseunpause').disabled = false;
+            this.#activeTime = 0;
+            this.activate();
+        } else {
+            this.shadowRoot.querySelector('#startstop').textContent = 'Start';
+            console.log(this.#log);
+
+            this.shadowRoot.querySelector('#pauseunpause').disabled = true;
+            this.deactivate();
+        }
+    }
+
+    doPauseUnpause() {
+        this.#active = !this.#active;
+        if (this.#active) {
+            this.activate(new Date());
+        } else {
+            this.deactivate();
+        }
+    }
+
+    activate() {
+        this.#active = true;
+        this.#activeDate = new Date();
+
+            this.shadowRoot.querySelector('#pauseunpause').textContent = 'Pause';
+    }
+
+    deactivate() {
+        this.#active = false;
+        this.#activeTime += new Date() - this.#activeDate;
+
+        this.shadowRoot.querySelector('#pauseunpause').textContent = 'Unpause';
+    }
+
+    setActive(str) {
+        this.shadowRoot.querySelector('#active').textContent = str;
+    }
+
+    setElapsed(str) {
+        this.shadowRoot.querySelector('#elapsed').textContent = str;
+    }
+
+    timeDiffToString(time) {
+        const seconds = time.getUTCSeconds();
+        const minutes = time.getUTCMinutes();
+        const hours = time.getUTCHours();
+
+        if (hours > 0) {
+            return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+        } else if (minutes > 0) {
+            return minutes.toString() + ":" + seconds.toString().padStart(2, "0");
+        } else {
+            return seconds;
+        }
+    }
+
+    setTime(str) {
+        this.shadowRoot.querySelector('#time').textContent = str;
+    }
+
+    timeToString(time) {
+        const seconds = time.getSeconds();
+        const minutes = time.getMinutes();
+        const hours = time.getHours();
+
+        return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+    }
+
+    onTimerTick() {
+        const now = Date.now();
+
+        if (this.#active) {
+            const diff = now - this.#activeDate;
+
+            this.setActive(this.timeDiffToString(new Date(this.#activeTime + diff)));
+        }
+
+        if (this.#started) {
+            const diff = now - this.#startDate;
+
+            this.setElapsed(this.timeDiffToString(new Date(diff)));
+        }
+
+        this.setTime(this.timeToString(new Date(now)));
+    }
+
+    setHR(str, bg) {
+        this.shadowRoot.querySelector('#hr').textContent = str;
+        this.shadowRoot.querySelector('#hr').style.backgroundColor = bg;
+    }
+    setHRMBat(str) {
+        this.shadowRoot.querySelector('#hrm_bat').textContent = str;
+    }
+
+    onHRMNotify(event) {
+        console.log(`Received heart rate measurement: ${event.target.value.getUint8(0)} ${event.target.value.getUint8(1)}`);
+
+        const hr = event.target.value.getUint8(1);
+
+        this.setHR(hr, color);
+    }
+
+    onHRMBatteryChange(event) {
+        console.log(`Battery change event: ${event.target.value.getUint8(0)}`);
+
+        const battery = event.target.value.getUint8(0);
+
+        this.setHRMBat(battery + '%');
+    }
+}
+
+customElements.define('main-app', MainApp);
+  </script>
+</html>
