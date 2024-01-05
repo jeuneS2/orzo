@@ -21,6 +21,7 @@
   <head>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
     </style>
   </head>
   <body>
@@ -34,7 +35,7 @@ template.innerHTML = `
         font-family: 'Roboto Mono', monospace;
    }
    button {
-        font-family: 'Roboto Mono', monospace;
+        font-family: 'Material Icons';
         border: 0px;
    }
    table {
@@ -44,9 +45,9 @@ template.innerHTML = `
  <div class="content">
     <table>
         <tr>
-            <td><button id='connect'>Connect</button></td>
-            <td><button id='startstop'>Start</button></td>
-            <td><button id='pauseunpause' disabled='true'>Unpause</button></td>
+            <td><button id='connect'>sensors</button></td>
+            <td><button id='startstop'>start</button></td>
+            <td><button id='pauseunpause' disabled='true'>pause</button></td>
         </tr>
         <tr>
           <td colspan="2"><table>
@@ -145,7 +146,7 @@ class MainApp extends HTMLElement {
     doStartStop() {
         this.#started = !this.#started;
         if (this.#started) {
-            this.shadowRoot.querySelector('#startstop').textContent = 'Stop';
+            this.shadowRoot.querySelector('#startstop').textContent = 'stop';
 
             this.#startDate = new Date();
             this.#log = [];
@@ -154,7 +155,7 @@ class MainApp extends HTMLElement {
             this.#activeTime = 0;
             this.activate();
         } else {
-            this.shadowRoot.querySelector('#startstop').textContent = 'Start';
+            this.shadowRoot.querySelector('#startstop').textContent = 'start';
             console.log(this.#log);
 
             this.shadowRoot.querySelector('#pauseunpause').disabled = true;
@@ -175,14 +176,14 @@ class MainApp extends HTMLElement {
         this.#active = true;
         this.#activeDate = new Date();
 
-            this.shadowRoot.querySelector('#pauseunpause').textContent = 'Pause';
+            this.shadowRoot.querySelector('#pauseunpause').textContent = 'pause';
     }
 
     deactivate() {
         this.#active = false;
         this.#activeTime += new Date() - this.#activeDate;
 
-        this.shadowRoot.querySelector('#pauseunpause').textContent = 'Unpause';
+        this.shadowRoot.querySelector('#pauseunpause').textContent = 'play_arrow';
     }
 
     setActive(str) {
