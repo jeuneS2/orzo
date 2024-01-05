@@ -237,9 +237,8 @@ class MainApp extends HTMLElement {
         this.setTime(this.timeToString(new Date(now)));
     }
 
-    setHR(str, bg) {
+    setHR(str) {
         this.shadowRoot.querySelector('#hr').textContent = str;
-        this.shadowRoot.querySelector('#hr').style.backgroundColor = bg;
     }
     setHRMBat(str) {
         this.shadowRoot.querySelector('#hrm_bat').textContent = str;
@@ -250,7 +249,7 @@ class MainApp extends HTMLElement {
 
         const hr = event.target.value.getUint8(1);
 
-        this.setHR(hr, color);
+        this.setHR(hr);
     }
 
     onHRMBatteryChange(event) {
