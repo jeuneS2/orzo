@@ -22,6 +22,11 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
       @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
+      body {
+        font-family: 'Roboto Mono', monospace;
+        background-color: #202020;
+        color: #E0E0E0;
+      }
     </style>
   </head>
   <body>
@@ -31,11 +36,10 @@
 const template = document.createElement('template');
 template.innerHTML = `
  <style>
-   :host {
-        font-family: 'Roboto Mono', monospace;
-   }
    button {
         font-family: 'Material Icons';
+        background-color: inherit;
+        color: inherit;
         border: 0px;
    }
    table {
@@ -45,9 +49,13 @@ template.innerHTML = `
  <div class="content">
     <table>
         <tr>
-            <td><button id='connect'>sensors</button></td>
-            <td><button id='startstop'>start</button></td>
-            <td><button id='pauseunpause' disabled='true'>pause</button></td>
+            <td colspan="3">
+                <button id='menu'>menu</button>
+                <button id='connect'>sensors</button>
+                <button id='startstop'>start</button>
+                <button id='pauseunpause' disabled='true'>pause</button>
+                <button id='fullscreen'>fullscreen</button>
+            </td>
         </tr>
         <tr>
           <td colspan="2"><table>
@@ -83,7 +91,6 @@ class MainApp extends HTMLElement {
     #activeTime
 
     #timerID
-    #log
 
     constructor() {
         super();
@@ -94,6 +101,7 @@ class MainApp extends HTMLElement {
         this.doScan = this.doScan.bind(this);
         this.doStartStop = this.doStartStop.bind(this);
         this.doPauseUnpause = this.doPauseUnpause.bind(this);
+        this.doFullScreen = this.doFullScreen.bind(this);
         this.onTimerTick = this.onTimerTick.bind(this);
         this.onHRMNotify = this.onHRMNotify.bind(this);
         this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
@@ -106,6 +114,7 @@ class MainApp extends HTMLElement {
         this.shadowRoot.querySelector('#connect').addEventListener('click', this.doScan);
         this.shadowRoot.querySelector('#startstop').addEventListener('click', this.doStartStop);
         this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
+        this.shadowRoot.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
     }
 
     disconnectedCallback() {
@@ -149,14 +158,12 @@ class MainApp extends HTMLElement {
             this.shadowRoot.querySelector('#startstop').textContent = 'stop';
 
             this.#startDate = new Date();
-            this.#log = [];
 
             this.shadowRoot.querySelector('#pauseunpause').disabled = false;
             this.#activeTime = 0;
             this.activate();
         } else {
             this.shadowRoot.querySelector('#startstop').textContent = 'start';
-            console.log(this.#log);
 
             this.shadowRoot.querySelector('#pauseunpause').disabled = true;
             this.deactivate();
@@ -184,6 +191,20 @@ class MainApp extends HTMLElement {
         this.#activeTime += new Date() - this.#activeDate;
 
         this.shadowRoot.querySelector('#pauseunpause').textContent = 'play_arrow';
+    }
+
+    doFullScreen() {
+        let elem = document.querySelector("body");
+
+        if (!document.fullscreenElement) {
+            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen_exit';
+
+            elem.requestFullscreen();
+        } else {
+            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen';
+
+            document.exitFullscreen();
+        }
     }
 
     setActive(str) {
