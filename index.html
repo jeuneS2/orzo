@@ -39,6 +39,7 @@ template.innerHTML = `
  <style>
    button {
         font-family: 'Material Icons';
+        font-size: inherit;
         background-color: inherit;
         color: inherit;
         border: 0px;
@@ -103,6 +104,7 @@ class MainApp extends HTMLElement {
         this.doStartStop = this.doStartStop.bind(this);
         this.doPauseUnpause = this.doPauseUnpause.bind(this);
         this.doFullScreen = this.doFullScreen.bind(this);
+        this.onFullScreenChanged = this.onFullScreenChanged.bind(this);
         this.onTimerTick = this.onTimerTick.bind(this);
         this.onHRMNotify = this.onHRMNotify.bind(this);
         this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
@@ -116,6 +118,7 @@ class MainApp extends HTMLElement {
         this.shadowRoot.querySelector('#startstop').addEventListener('click', this.doStartStop);
         this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
         this.shadowRoot.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
+        document.addEventListener("fullscreenchange", this.onFullScreenChanged);
     }
 
     disconnectedCallback() {
@@ -205,6 +208,14 @@ class MainApp extends HTMLElement {
             this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen';
 
             document.exitFullscreen();
+        }
+    }
+
+    onFullScreenChanged() {
+        if (!document.fullscreenElement) {
+            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen';
+        } else {
+            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen_exit';
         }
     }
 
