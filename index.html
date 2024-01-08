@@ -27,6 +27,8 @@
         font-family: 'Roboto Mono', monospace;
         background-color: #202020;
         color: #E0E0E0;
+        width: 96vw;
+        max-width: 640px;
       }
     </style>
   </head>
@@ -37,6 +39,15 @@
 const template = document.createElement('template');
 template.innerHTML = `
  <style>
+   .content {
+        width: 100%;
+        container-type: inline-size;
+   }
+   table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10cqw;
+   }
    button {
         font-family: 'Material Icons';
         font-size: inherit;
@@ -44,18 +55,19 @@ template.innerHTML = `
         color: inherit;
         border: 0px;
    }
-   table {
-        border-collapse: collapse;
-   }
  </style>
  <div class="content">
     <table>
         <tr>
-            <td colspan="3">
+            <td colspan="3" style="display: flex">
                 <button id='menu'>menu</button>
+                <div style="flex: 1"></div>
                 <button id='connect'>sensors</button>
+                <div style="flex: 1"></div>
                 <button id='startstop'>start</button>
+                <div style="flex: 1"></div>
                 <button id='pauseunpause' disabled='true'>pause</button>
+                <div style="flex: 1"></div>
                 <button id='fullscreen'>fullscreen</button>
             </td>
         </tr>
@@ -198,7 +210,7 @@ class MainApp extends HTMLElement {
     }
 
     doFullScreen() {
-        let elem = document.querySelector("body");
+        let elem = document.querySelector("html");
 
         if (!document.fullscreenElement) {
             this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen_exit';
