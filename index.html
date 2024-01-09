@@ -39,30 +39,40 @@
 const template = document.createElement('template');
 template.innerHTML = `
  <style>
-   .content {
+    div.content {
         width: 100%;
         container-type: inline-size;
-   }
-   table {
+    }
+    table.content {
         width: 100%;
         border-collapse: collapse;
-        font-size: 10cqw;
-   }
-   button {
+        font-size: 10.5cqw;
+    }
+    td.content {
+        display: flex;
+        align-items: baseline;
+    }
+    .battery {
+        font-size: 6cqw;
+    }
+    #position {
+        font-size: 6cqw;
+    }
+    button {
         font-family: 'Material Icons';
         font-size: inherit;
         background-color: inherit;
         color: inherit;
         border: 0px;
-   }
-   button:disabled {
+    }
+    button:disabled {
         opacity: 50%;
-   }
+    }
  </style>
  <div class="content">
-    <table>
+    <table class="content">
         <tr>
-            <td colspan="3" style="display: flex">
+            <td class="content">
                 <button id='menu'>menu</button>
                 <div style="flex: 1"></div>
                 <button id='connect'>sensors</button>
@@ -75,26 +85,41 @@ template.innerHTML = `
             </td>
         </tr>
         <tr>
-          <td colspan="2"><table>
-            <tr>
-                <td>HR</td>
-                <td style="text-align: right"><span id='hr'>n/a</span></td>
-                <td style="text-align: right"><span id='hrm_bat' style="font-size: x-small"></span></td>
-            </tr>
-            <tr>
-                <td>active</td>
-                <td colspan="2" style="text-align: right"><span id='active'> - </span></td>
-            </tr>
-            <tr>
-                <td>elapsed</td>
-                <td colspan="2" style="text-align: right"><span id='elapsed'> - </span></td>
-            </tr>
-            <tr>
-                <td>time</td>
-                <td colspan="2" style="text-align: right"><span id='time'> - </span></td>
-            </tr>
-        </table>
-        </td></tr>
+            <td class="content">
+                HR
+                <span id='hrm_bat' class="battery"></span>
+                <div style="flex: 1"></div>
+                <span id='hr'>n/a</span>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                active
+                <div style="flex: 1"></div>
+                <span id='active'> - </span>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                elapsed
+                <div style="flex: 1"></div>
+                <span id='elapsed'> - </span>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                time
+                <div style="flex: 1"></div>
+                <span id='time'> - </span>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                pos
+                <div style="flex: 1"></div>
+                <span id='position'> - </span>
+            </td>
+        </tr>
     </table>
 </div>
 `;
@@ -121,6 +146,7 @@ class MainApp extends HTMLElement {
         this.doFullScreen = this.doFullScreen.bind(this);
         this.onFullScreenChanged = this.onFullScreenChanged.bind(this);
         this.onTimerTick = this.onTimerTick.bind(this);
+        this.onPositionChanged = this.onPositionChanged.bind(this);
         this.onHRMNotify = this.onHRMNotify.bind(this);
         this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
 
@@ -134,6 +160,8 @@ class MainApp extends HTMLElement {
         this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
         this.shadowRoot.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
         document.addEventListener("fullscreenchange", this.onFullScreenChanged);
+        const locationOptions = { enableHighAccuracy: true };
+        navigator.geolocation.watchPosition(this.onPositionChanged, undefined, locationOptions);
     }
 
     disconnectedCallback() {
@@ -284,6 +312,10 @@ class MainApp extends HTMLElement {
         }
 
         this.setTime(this.timeToString(new Date(now)));
+    }
+
+    onPositionChanged(position) {
+        this.shadowRoot.querySelector('#position').textContent = position.coords.latitude + "/" + position.coords.longitude;
     }
 
     setHR(str) {
