@@ -258,11 +258,17 @@ class MainApp extends HTMLElement {
             this.shadowRoot.querySelector('#pauseunpause').disabled = false;
             this.#activeTime = 0;
             this.activate();
+
+            window.onbeforeunload = function() {
+                return 'Are you sure you want to leave?';
+            };
         } else {
             this.shadowRoot.querySelector('#startstop').textContent = 'start';
 
             this.shadowRoot.querySelector('#pauseunpause').disabled = true;
             this.deactivate();
+
+            window.onbeforeunload = undefined;
         }
     }
 
