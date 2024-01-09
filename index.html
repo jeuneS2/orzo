@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with Orzo. If not, see <https://www.gnu.org/licenses/>.
 
-    Copyright 2014 Wolfgang Puffitsch
+    Copyright 2024 Wolfgang Puffitsch
 -->
 <html>
   <head>
@@ -39,25 +39,37 @@
 const template = document.createElement('template');
 template.innerHTML = `
  <style>
-    div.content {
+    #main {
         width: 100%;
         container-type: inline-size;
     }
-    table.content {
+    table.main {
         width: 100%;
         border-collapse: collapse;
         font-size: 10.5cqw;
     }
-    td.content {
+    td.flex {
         display: flex;
         align-items: baseline;
     }
+
+    #content {
+        width: 100%;
+    }
+    #menu {
+        display: none;
+    }
+
     .battery {
         font-size: 6cqw;
     }
     #position {
         font-size: 6cqw;
     }
+    .copyright {
+        font-size: 4cqw;
+    }
+
     button {
         font-family: 'Material Icons';
         font-size: inherit;
@@ -69,62 +81,80 @@ template.innerHTML = `
         opacity: 50%;
     }
  </style>
- <div class="content">
-    <table class="content">
-        <tr>
-            <td class="content">
-                <button id='menu'>menu</button>
-                <div style="flex: 1"></div>
-                <button id='connect'>sensors</button>
-                <div style="flex: 1"></div>
-                <button id='startstop'>start</button>
-                <div style="flex: 1"></div>
-                <button id='pauseunpause' disabled>play_arrow</button>
-                <div style="flex: 1"></div>
-                <button id='fullscreen'>fullscreen</button>
-            </td>
-        </tr>
-        <tr>
-            <td class="content">
-                HR
-                <span id='hrm_bat' class="battery"></span>
-                <div style="flex: 1"></div>
-                <span id='hr'>n/a</span>
-            </td>
-        </tr>
-        <tr>
-            <td class="content">
-                active
-                <div style="flex: 1"></div>
-                <span id='active'> - </span>
-            </td>
-        </tr>
-        <tr>
-            <td class="content">
-                elapsed
-                <div style="flex: 1"></div>
-                <span id='elapsed'> - </span>
-            </td>
-        </tr>
-        <tr>
-            <td class="content">
-                time
-                <div style="flex: 1"></div>
-                <span id='time'> - </span>
-            </td>
-        </tr>
-        <tr>
-            <td class="content">
-                pos
-                <div style="flex: 1"></div>
-                <span id='position'> - </span>
-            </td>
-        </tr>
+ <div id="main">
+    <table class="main">
+        <thead>
+            <tr>
+                <td class="flex">
+                    <button id='page'>menu</button>
+                    <div style="flex: 1"></div>
+                    <button id='connect'>sensors</button>
+                    <div style="flex: 1"></div>
+                    <button id='startstop'>start</button>
+                    <div style="flex: 1"></div>
+                    <button id='pauseunpause' disabled>play_arrow</button>
+                    <div style="flex: 1"></div>
+                    <button id='fullscreen'>fullscreen</button>
+                </td>
+            </tr>
+        </thead>
+        <tbody id="menu">
+            <tr>
+                <td class="flex">
+                orzo 0.0.0
+                </td>
+            </tr>
+            <tr>
+                <td class="flex">
+                <span class="copyright">Copyright &copy; 2024 Wolfgang Puffitsch</span>
+                </td>
+            </tr>
+        </tbody>
+        <tbody id="content">
+            <tr>
+                <td class="flex">
+                    HR&nbsp;
+                    <span id='hrm_bat' class="battery"></span>
+                    <div style="flex: 1"></div>
+                    <span id='hr'>n/a</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="flex">
+                    active
+                    <div style="flex: 1"></div>
+                    <span id='active'> - </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="flex">
+                    elapsed
+                    <div style="flex: 1"></div>
+                    <span id='elapsed'> - </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="flex">
+                    time
+                    <div style="flex: 1"></div>
+                    <span id='time'> - </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="flex">
+                    pos
+                    <div style="flex: 1"></div>
+                    <span id='position'> - </span>
+                </td>
+            </tr>
+        </tbody>
     </table>
 </div>
 `;
 
 class MainApp extends HTMLElement {
+    #showMenu
+
     #started
     #startDate
 
@@ -140,6 +170,7 @@ class MainApp extends HTMLElement {
         const shadowRoot = this.attachShadow({mode: 'open'});
         shadowRoot.appendChild(template.content.cloneNode(true));
 
+        this.doPageToggle = this.doPageToggle.bind(this);
         this.doScan = this.doScan.bind(this);
         this.doStartStop = this.doStartStop.bind(this);
         this.doPauseUnpause = this.doPauseUnpause.bind(this);
@@ -152,9 +183,12 @@ class MainApp extends HTMLElement {
 
         this.#timerID = setInterval(this.onTimerTick, 1000);
         this.#started = false;
+        this.#active = false;
+        this.#showMenu = false;
     }
 
     connectedCallback() {
+        this.shadowRoot.querySelector('#page').addEventListener('click', this.doPageToggle);
         this.shadowRoot.querySelector('#connect').addEventListener('click', this.doScan);
         this.shadowRoot.querySelector('#startstop').addEventListener('click', this.doStartStop);
         this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
@@ -165,6 +199,21 @@ class MainApp extends HTMLElement {
     }
 
     disconnectedCallback() {
+    }
+
+    doPageToggle() {
+        this.#showMenu = !this.#showMenu;
+        if (this.#showMenu) {
+            this.shadowRoot.querySelector('#page').textContent = 'speed';
+
+            this.shadowRoot.querySelector('#menu').style.display = "inherit";
+            this.shadowRoot.querySelector('#content').style.display = "none";
+        } else {
+            this.shadowRoot.querySelector('#page').textContent = 'menu';
+
+            this.shadowRoot.querySelector('#menu').style.display = "none";
+            this.shadowRoot.querySelector('#content').style.display = "inherit";
+        }
     }
 
     async doScan() {
@@ -326,16 +375,12 @@ class MainApp extends HTMLElement {
     }
 
     onHRMNotify(event) {
-        console.log(`Received heart rate measurement: ${event.target.value.getUint8(0)} ${event.target.value.getUint8(1)}`);
-
         const hr = event.target.value.getUint8(1);
 
         this.setHR(hr);
     }
 
     onHRMBatteryChange(event) {
-        console.log(`Battery change event: ${event.target.value.getUint8(0)}`);
-
         const battery = event.target.value.getUint8(0);
 
         this.setHRMBat(battery + '%');
