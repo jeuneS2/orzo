@@ -58,6 +58,12 @@
       #position {
           font-size: 6cqw;
       }
+      #distance {
+          font-size: 6cqw;
+      }
+      #speed {
+          font-size: 6cqw;
+      }
       .copyright {
           font-size: 4cqw;
       }
@@ -151,6 +157,13 @@
               dist
               <div style="flex: 1"></div>
               <span id='distance'> - </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              speed
+              <div style="flex: 1"></div>
+              <span id='speed'> - </span>
             </td>
           </tr>
         </tbody>
@@ -389,6 +402,14 @@
 
                 const dist = 2 * radius * Math.asin(Math.sqrt(haversinDeltaLat + cosLat1*cosLat2*haversinDeltaLng));
                 document.querySelector('#distance').textContent = dist;
+
+                const deltaMillis = position.timestamp - this.#position.timestamp;
+                if (deltaMillis != 0) {
+                    const deltaHours = deltaMillis / (60 * 60 * 1000);
+                    const speed = dist / deltaHours;
+
+                    document.querySelector('#speed').textContent = speed;
+                }
             }
 
             this.#position = position;
