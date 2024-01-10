@@ -146,6 +146,13 @@
               <span id='position'> - </span>
             </td>
           </tr>
+          <tr>
+            <td class="flex">
+              dist
+              <div style="flex: 1"></div>
+              <span id='distance'> - </span>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -159,6 +166,8 @@
         #active
         #activeDate
         #activeTime
+
+        #position
 
         #timerID
 
@@ -178,6 +187,7 @@
             this.#started = false;
             this.#active = false;
             this.#showMenu = false;
+            this.#position = undefined
         }
 
         setup() {
@@ -361,6 +371,27 @@
 
         onPositionChanged(position) {
             document.querySelector('#position').textContent = position.coords.latitude + "/" + position.coords.longitude;
+
+            if (this.#position) {
+                const toRad = angle => (Math.PI / 180) * angle;
+
+                const lng1 = toRad(this.#position.coords.longitude);
+                const lat1 = toRad(this.#position.coords.latitude);
+                const lng2 = toRad(position.coords.longitude);
+                const lat2 = toRad(position.coords.latitude);
+
+                const radius = 6371;
+
+                const haversinDeltaLat = Math.sqr(Math.sin((lat2 - lat1)/2));
+                const haversinDeltaLng = Math.sqr(Math.sin((lng2 - lng1)/2));
+                const cosLat1 = Math.cos(lat1);
+                const cosLat2 = Math.cos(lat2);
+
+                const dist = 2 * radius * Math.arcsin(Math.sqrt(haversinDeltaLat + cosLat1*cosLat2*haversinDeltaLng));
+                document.querySelector('#distance').textContent = dist;
+            }
+
+            this.#position = position;
         }
 
         setHR(str) {
