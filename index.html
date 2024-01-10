@@ -24,375 +24,360 @@
       @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@700&display=swap');
       @import url('https://fonts.googleapis.com/css2?family=Material+Icons');
       body {
-        font-family: 'Roboto Mono', monospace;
-        background-color: #101010;
-        color: #D0D0D0;
-        width: 96vw;
-        max-width: 640px;
+          font-family: 'Roboto Mono', monospace;
+          background-color: #101010;
+          color: #D0D0D0;
+          width: 96vw;
+          max-width: 640px;
+      }
+
+      #main {
+          width: 100%;
+          container-type: inline-size;
+      }
+      table.main {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 10.5cqw;
+      }
+      td.flex {
+          display: flex;
+          align-items: baseline;
+      }
+
+      #content {
+          width: 100%;
+      }
+      #menu {
+          display: none;
+      }
+
+      .battery {
+          font-size: 6cqw;
+      }
+      #position {
+          font-size: 6cqw;
+      }
+      .copyright {
+          font-size: 4cqw;
+      }
+
+      button {
+          font-family: 'Material Icons';
+          font-size: inherit;
+          background-color: inherit;
+          color: inherit;
+          border: 0px;
+      }
+      button:disabled {
+          opacity: 50%;
       }
     </style>
   </head>
-  <body>
-    <main-app></main-app>
-  </body>
-  <script>
-const template = document.createElement('template');
-template.innerHTML = `
- <style>
-    #main {
-        width: 100%;
-        container-type: inline-size;
-    }
-    table.main {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 10.5cqw;
-    }
-    td.flex {
-        display: flex;
-        align-items: baseline;
-    }
-
-    #content {
-        width: 100%;
-    }
-    #menu {
-        display: none;
-    }
-
-    .battery {
-        font-size: 6cqw;
-    }
-    #position {
-        font-size: 6cqw;
-    }
-    .copyright {
-        font-size: 4cqw;
-    }
-
-    button {
-        font-family: 'Material Icons';
-        font-size: inherit;
-        background-color: inherit;
-        color: inherit;
-        border: 0px;
-    }
-    button:disabled {
-        opacity: 50%;
-    }
- </style>
- <div id="main">
-    <table class="main">
+    <body onload="new Orzo().setup()">
+    <div id="main">
+      <table class="main">
         <thead>
-            <tr>
-                <td class="flex">
-                    <button id='page'>menu</button>
-                    <div style="flex: 1"></div>
-                    <button id='connect'>sensors</button>
-                    <div style="flex: 1"></div>
-                    <button id='startstop'>start</button>
-                    <div style="flex: 1"></div>
-                    <button id='pauseunpause' disabled>play_arrow</button>
-                    <div style="flex: 1"></div>
-                    <button id='fullscreen'>fullscreen</button>
-                </td>
-            </tr>
+          <tr>
+            <td class="flex">
+              <button id='page'>menu</button>
+              <div style="flex: 1"></div>
+              <button id='connect'>sensors</button>
+              <div style="flex: 1"></div>
+              <button id='startstop'>start</button>
+              <div style="flex: 1"></div>
+              <button id='pauseunpause' disabled>play_arrow</button>
+              <div style="flex: 1"></div>
+              <button id='fullscreen'>fullscreen</button>
+            </td>
+          </tr>
         </thead>
         <tbody id="menu">
-            <tr>
-                <td class="flex">
-                orzo 0.0.0
-                </td>
-            </tr>
-            <tr>
-                <td class="flex">
-                <span class="copyright">Copyright &copy; 2024 Wolfgang Puffitsch</span>
-                </td>
-            </tr>
+          <tr>
+            <td class="flex">
+              orzo 0.0.0
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              <span class="copyright">Copyright &copy; 2024 Wolfgang Puffitsch</span>
+            </td>
+          </tr>
         </tbody>
         <tbody id="content">
-            <tr>
-                <td class="flex">
-                    HR&nbsp;
-                    <span id='hrm_bat' class="battery"></span>
-                    <div style="flex: 1"></div>
-                    <span id='hr'>n/a</span>
-                </td>
-            </tr>
-            <tr>
-                <td class="flex">
-                    active
-                    <div style="flex: 1"></div>
-                    <span id='active'> - </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="flex">
-                    elapsed
-                    <div style="flex: 1"></div>
-                    <span id='elapsed'> - </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="flex">
-                    time
-                    <div style="flex: 1"></div>
-                    <span id='time'> - </span>
-                </td>
-            </tr>
-            <tr>
-                <td class="flex">
-                    pos
-                    <div style="flex: 1"></div>
-                    <span id='position'> - </span>
-                </td>
-            </tr>
+          <tr>
+            <td class="flex">
+              HR&nbsp;
+              <span id='hrm_bat' class="battery"></span>
+              <div style="flex: 1"></div>
+              <span id='hr'>n/a</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              active
+              <div style="flex: 1"></div>
+              <span id='active'> - </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              elapsed
+              <div style="flex: 1"></div>
+              <span id='elapsed'> - </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              time
+              <div style="flex: 1"></div>
+              <span id='time'> - </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              pos
+              <div style="flex: 1"></div>
+              <span id='position'> - </span>
+            </td>
+          </tr>
         </tbody>
-    </table>
-</div>
-`;
+      </table>
+    </div>
+  </body>
+  <script>
+    class Orzo {
+        #showMenu
 
-class MainApp extends HTMLElement {
-    #showMenu
+        #started
+        #startDate
 
-    #started
-    #startDate
+        #active
+        #activeDate
+        #activeTime
 
-    #active
-    #activeDate
-    #activeTime
+        #timerID
 
-    #timerID
+        constructor() {
+            this.doPageToggle = this.doPageToggle.bind(this);
+            this.doScan = this.doScan.bind(this);
+            this.doStartStop = this.doStartStop.bind(this);
+            this.doPauseUnpause = this.doPauseUnpause.bind(this);
+            this.doFullScreen = this.doFullScreen.bind(this);
+            this.onFullScreenChanged = this.onFullScreenChanged.bind(this);
+            this.onTimerTick = this.onTimerTick.bind(this);
+            this.onPositionChanged = this.onPositionChanged.bind(this);
+            this.onHRMNotify = this.onHRMNotify.bind(this);
+            this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
 
-    constructor() {
-        super();
-
-        const shadowRoot = this.attachShadow({mode: 'open'});
-        shadowRoot.appendChild(template.content.cloneNode(true));
-
-        this.doPageToggle = this.doPageToggle.bind(this);
-        this.doScan = this.doScan.bind(this);
-        this.doStartStop = this.doStartStop.bind(this);
-        this.doPauseUnpause = this.doPauseUnpause.bind(this);
-        this.doFullScreen = this.doFullScreen.bind(this);
-        this.onFullScreenChanged = this.onFullScreenChanged.bind(this);
-        this.onTimerTick = this.onTimerTick.bind(this);
-        this.onPositionChanged = this.onPositionChanged.bind(this);
-        this.onHRMNotify = this.onHRMNotify.bind(this);
-        this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
-
-        this.#timerID = setInterval(this.onTimerTick, 1000);
-        this.#started = false;
-        this.#active = false;
-        this.#showMenu = false;
-    }
-
-    connectedCallback() {
-        this.shadowRoot.querySelector('#page').addEventListener('click', this.doPageToggle);
-        this.shadowRoot.querySelector('#connect').addEventListener('click', this.doScan);
-        this.shadowRoot.querySelector('#startstop').addEventListener('click', this.doStartStop);
-        this.shadowRoot.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
-        this.shadowRoot.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
-        document.addEventListener("fullscreenchange", this.onFullScreenChanged);
-        const locationOptions = { enableHighAccuracy: true };
-        navigator.geolocation.watchPosition(this.onPositionChanged, undefined, locationOptions);
-    }
-
-    disconnectedCallback() {
-    }
-
-    doPageToggle() {
-        this.#showMenu = !this.#showMenu;
-        if (this.#showMenu) {
-            this.shadowRoot.querySelector('#page').textContent = 'speed';
-
-            this.shadowRoot.querySelector('#menu').style.display = "inherit";
-            this.shadowRoot.querySelector('#content').style.display = "none";
-        } else {
-            this.shadowRoot.querySelector('#page').textContent = 'menu';
-
-            this.shadowRoot.querySelector('#menu').style.display = "none";
-            this.shadowRoot.querySelector('#content').style.display = "inherit";
+            this.#timerID = setInterval(this.onTimerTick, 1000);
+            this.#started = false;
+            this.#active = false;
+            this.#showMenu = false;
         }
-    }
 
-    async doScan() {
-        const device = await navigator.bluetooth.requestDevice({
-            filters: [{ services: ['heart_rate']}],
-            optionalServices: ['battery_service']
-        });
+        setup() {
+            document.querySelector('#page').addEventListener('click', this.doPageToggle);
+            document.querySelector('#connect').addEventListener('click', this.doScan);
+            document.querySelector('#startstop').addEventListener('click', this.doStartStop);
+            document.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
+            document.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
+            document.addEventListener("fullscreenchange", this.onFullScreenChanged);
+            const locationOptions = { enableHighAccuracy: true };
+            navigator.geolocation.watchPosition(this.onPositionChanged, undefined, locationOptions);
+        }
 
-        if (device) {
-            const server = await device.gatt.connect();
+        doPageToggle() {
+            this.#showMenu = !this.#showMenu;
+            if (this.#showMenu) {
+                document.querySelector('#page').textContent = 'speed';
 
-            const service = await server.getPrimaryService('heart_rate');
-            const characteristic = await service.getCharacteristic('heart_rate_measurement');
-            if (characteristic.properties.notify) {
-                characteristic.addEventListener( "characteristicvaluechanged", this.onHRMNotify);
-                await characteristic.startNotifications();
+                document.querySelector('#menu').style.display = "inherit";
+                document.querySelector('#content').style.display = "none";
+            } else {
+                document.querySelector('#page').textContent = 'menu';
+
+                document.querySelector('#menu').style.display = "none";
+                document.querySelector('#content').style.display = "inherit";
             }
+        }
 
-            try {
-                const service = await server.getPrimaryService('battery_service');
-                const characteristic = await service.getCharacteristic('battery_level');
+        async doScan() {
+            const device = await navigator.bluetooth.requestDevice({
+                filters: [{ services: ['heart_rate']}],
+                optionalServices: ['battery_service']
+            });
 
-                const battery = (await characteristic.readValue()).getUint8(0);
-                this.setHRMBat(battery + '%');
+            if (device) {
+                const server = await device.gatt.connect();
 
-                characteristic.addEventListener('characteristicvaluechanged', this.HRMonBatteryChange);
-                await characteristic.startNotifications();
-            } catch(err) {
-                console.log("Error with battery service: ", err);
+                const service = await server.getPrimaryService('heart_rate');
+                const characteristic = await service.getCharacteristic('heart_rate_measurement');
+                if (characteristic.properties.notify) {
+                    characteristic.addEventListener( "characteristicvaluechanged", this.onHRMNotify);
+                    await characteristic.startNotifications();
+                }
+
+                try {
+                    const service = await server.getPrimaryService('battery_service');
+                    const characteristic = await service.getCharacteristic('battery_level');
+
+                    const battery = (await characteristic.readValue()).getUint8(0);
+                    this.setHRMBat(battery + '%');
+
+                    characteristic.addEventListener('characteristicvaluechanged', this.HRMonBatteryChange);
+                    await characteristic.startNotifications();
+                } catch(err) {
+                    // just ignore errors
+                }
+
             }
-
         }
-    }
 
-    doStartStop() {
-        this.#started = !this.#started;
-        if (this.#started) {
-            this.shadowRoot.querySelector('#startstop').textContent = 'stop';
+        doStartStop() {
+            this.#started = !this.#started;
+            if (this.#started) {
+                document.querySelector('#startstop').textContent = 'stop';
 
-            this.#startDate = new Date();
+                this.#startDate = new Date();
 
-            this.shadowRoot.querySelector('#pauseunpause').disabled = false;
-            this.#activeTime = 0;
-            this.activate();
+                document.querySelector('#pauseunpause').disabled = false;
+                this.#activeTime = 0;
+                this.activate();
 
-            window.onbeforeunload = function() {
-                return 'Are you sure you want to leave?';
-            };
-        } else {
-            this.shadowRoot.querySelector('#startstop').textContent = 'start';
+                window.onbeforeunload = function() {
+                    return 'Are you sure you want to leave?';
+                };
+            } else {
+                document.querySelector('#startstop').textContent = 'start';
 
-            this.shadowRoot.querySelector('#pauseunpause').disabled = true;
-            this.deactivate();
+                document.querySelector('#pauseunpause').disabled = true;
+                this.deactivate();
 
-            window.onbeforeunload = undefined;
+                window.onbeforeunload = undefined;
+            }
         }
-    }
 
-    doPauseUnpause() {
-        this.#active = !this.#active;
-        if (this.#active) {
-            this.activate(new Date());
-        } else {
-            this.deactivate();
+        doPauseUnpause() {
+            this.#active = !this.#active;
+            if (this.#active) {
+                this.activate(new Date());
+            } else {
+                this.deactivate();
+            }
         }
-    }
 
-    activate() {
-        this.#active = true;
-        this.#activeDate = new Date();
+        activate() {
+            this.#active = true;
+            this.#activeDate = new Date();
 
-            this.shadowRoot.querySelector('#pauseunpause').textContent = 'pause';
-    }
-
-    deactivate() {
-        this.#active = false;
-        this.#activeTime += new Date() - this.#activeDate;
-
-        this.shadowRoot.querySelector('#pauseunpause').textContent = 'play_arrow';
-    }
-
-    doFullScreen() {
-        let elem = document.querySelector("html");
-
-        if (!document.fullscreenElement) {
-            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen_exit';
-
-            elem.requestFullscreen();
-        } else {
-            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen';
-
-            document.exitFullscreen();
+            document.querySelector('#pauseunpause').textContent = 'pause';
         }
-    }
 
-    onFullScreenChanged() {
-        if (!document.fullscreenElement) {
-            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen';
-        } else {
-            this.shadowRoot.querySelector('#fullscreen').textContent = 'fullscreen_exit';
+        deactivate() {
+            this.#active = false;
+            this.#activeTime += new Date() - this.#activeDate;
+
+            document.querySelector('#pauseunpause').textContent = 'play_arrow';
         }
-    }
 
-    setActive(str) {
-        this.shadowRoot.querySelector('#active').textContent = str;
-    }
+        doFullScreen() {
+            let elem = document.querySelector("html");
 
-    setElapsed(str) {
-        this.shadowRoot.querySelector('#elapsed').textContent = str;
-    }
+            if (!document.fullscreenElement) {
+                document.querySelector('#fullscreen').textContent = 'fullscreen_exit';
 
-    timeDiffToString(time) {
-        const seconds = time.getUTCSeconds();
-        const minutes = time.getUTCMinutes();
-        const hours = time.getUTCHours();
+                elem.requestFullscreen();
+            } else {
+                document.querySelector('#fullscreen').textContent = 'fullscreen';
 
-        if (hours > 0) {
+                document.exitFullscreen();
+            }
+        }
+
+        onFullScreenChanged() {
+            if (!document.fullscreenElement) {
+                document.querySelector('#fullscreen').textContent = 'fullscreen';
+            } else {
+                document.querySelector('#fullscreen').textContent = 'fullscreen_exit';
+            }
+        }
+
+        setActive(str) {
+            document.querySelector('#active').textContent = str;
+        }
+
+        setElapsed(str) {
+            document.querySelector('#elapsed').textContent = str;
+        }
+
+        timeDiffToString(time) {
+            const seconds = time.getUTCSeconds();
+            const minutes = time.getUTCMinutes();
+            const hours = time.getUTCHours();
+
+            if (hours > 0) {
+                return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+            } else if (minutes > 0) {
+                return minutes.toString() + ":" + seconds.toString().padStart(2, "0");
+            } else {
+                return seconds;
+            }
+        }
+
+        setTime(str) {
+            document.querySelector('#time').textContent = str;
+        }
+
+        timeToString(time) {
+            const seconds = time.getSeconds();
+            const minutes = time.getMinutes();
+            const hours = time.getHours();
+
             return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
-        } else if (minutes > 0) {
-            return minutes.toString() + ":" + seconds.toString().padStart(2, "0");
-        } else {
-            return seconds;
-        }
-    }
-
-    setTime(str) {
-        this.shadowRoot.querySelector('#time').textContent = str;
-    }
-
-    timeToString(time) {
-        const seconds = time.getSeconds();
-        const minutes = time.getMinutes();
-        const hours = time.getHours();
-
-        return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
-    }
-
-    onTimerTick() {
-        const now = Date.now();
-
-        if (this.#active) {
-            const diff = now - this.#activeDate;
-
-            this.setActive(this.timeDiffToString(new Date(this.#activeTime + diff)));
         }
 
-        if (this.#started) {
-            const diff = now - this.#startDate;
+        onTimerTick() {
+            const now = Date.now();
 
-            this.setElapsed(this.timeDiffToString(new Date(diff)));
+            if (this.#active) {
+                const diff = now - this.#activeDate;
+
+                this.setActive(this.timeDiffToString(new Date(this.#activeTime + diff)));
+            }
+
+            if (this.#started) {
+                const diff = now - this.#startDate;
+
+                this.setElapsed(this.timeDiffToString(new Date(diff)));
+            }
+
+            this.setTime(this.timeToString(new Date(now)));
         }
 
-        this.setTime(this.timeToString(new Date(now)));
+        onPositionChanged(position) {
+            document.querySelector('#position').textContent = position.coords.latitude + "/" + position.coords.longitude;
+        }
+
+        setHR(str) {
+            document.querySelector('#hr').textContent = str;
+        }
+
+        setHRMBat(str) {
+            document.querySelector('#hrm_bat').textContent = str;
+        }
+
+        onHRMNotify(event) {
+            const hr = event.target.value.getUint8(1);
+
+            this.setHR(hr);
+        }
+
+        onHRMBatteryChange(event) {
+            const battery = event.target.value.getUint8(0);
+
+            this.setHRMBat(battery + '%');
+        }
     }
-
-    onPositionChanged(position) {
-        this.shadowRoot.querySelector('#position').textContent = position.coords.latitude + "/" + position.coords.longitude;
-    }
-
-    setHR(str) {
-        this.shadowRoot.querySelector('#hr').textContent = str;
-    }
-    setHRMBat(str) {
-        this.shadowRoot.querySelector('#hrm_bat').textContent = str;
-    }
-
-    onHRMNotify(event) {
-        const hr = event.target.value.getUint8(1);
-
-        this.setHR(hr);
-    }
-
-    onHRMBatteryChange(event) {
-        const battery = event.target.value.getUint8(0);
-
-        this.setHRMBat(battery + '%');
-    }
-}
-
-customElements.define('main-app', MainApp);
   </script>
 </html>
