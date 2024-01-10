@@ -64,6 +64,9 @@
       #speed {
           font-size: 6cqw;
       }
+      #speed2 {
+          font-size: 6cqw;
+      }
       .copyright {
           font-size: 4cqw;
       }
@@ -164,6 +167,13 @@
               speed
               <div style="flex: 1"></div>
               <span id='speed'> - </span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              speed
+              <div style="flex: 1"></div>
+              <span id='speed2'> - </span>
             </td>
           </tr>
         </tbody>
@@ -413,6 +423,8 @@
             }
 
             this.#position = position;
+
+            document.querySelector('#speed2').textContent = position.coords.speed;
         }
 
         setHR(str) {
