@@ -55,18 +55,6 @@
       .battery {
           font-size: 6cqw;
       }
-      #position {
-          font-size: 6cqw;
-      }
-      #distance {
-          font-size: 6cqw;
-      }
-      #speed {
-          font-size: 6cqw;
-      }
-      #speed2 {
-          font-size: 6cqw;
-      }
       .copyright {
           font-size: 4cqw;
       }
@@ -150,30 +138,9 @@
           </tr>
           <tr>
             <td class="flex">
-              pos
-              <div style="flex: 1"></div>
-              <span id='position'> - </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              dist
-              <div style="flex: 1"></div>
-              <span id='distance'> - </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
               speed
               <div style="flex: 1"></div>
-              <span id='speed'> - </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              speed
-              <div style="flex: 1"></div>
-              <span id='speed2'> - </span>
+              <span id='speed'>n/a</span>
             </td>
           </tr>
         </tbody>
@@ -189,8 +156,6 @@
         #active
         #activeDate
         #activeTime
-
-        #position
 
         #timerID
 
@@ -210,7 +175,6 @@
             this.#started = false;
             this.#active = false;
             this.#showMenu = false;
-            this.#position = undefined
         }
 
         setup() {
@@ -393,38 +357,9 @@
         }
 
         onPositionChanged(position) {
-            document.querySelector('#position').textContent = position.coords.latitude + "/" + position.coords.longitude;
-
-            if (this.#position) {
-                const toRad = angle => (Math.PI / 180) * angle;
-
-                const lng1 = toRad(this.#position.coords.longitude);
-                const lat1 = toRad(this.#position.coords.latitude);
-                const lng2 = toRad(position.coords.longitude);
-                const lat2 = toRad(position.coords.latitude);
-
-                const radius = 6371;
-
-                const haversinDeltaLat = Math.pow(Math.sin((lat2 - lat1)/2), 2);
-                const haversinDeltaLng = Math.pow(Math.sin((lng2 - lng1)/2), 2);
-                const cosLat1 = Math.cos(lat1);
-                const cosLat2 = Math.cos(lat2);
-
-                const dist = 2 * radius * Math.asin(Math.sqrt(haversinDeltaLat + cosLat1*cosLat2*haversinDeltaLng));
-                document.querySelector('#distance').textContent = dist;
-
-                const deltaMillis = position.timestamp - this.#position.timestamp;
-                if (deltaMillis != 0) {
-                    const deltaHours = deltaMillis / (60 * 60 * 1000);
-                    const speed = dist / deltaHours;
-
-                    document.querySelector('#speed').textContent = speed;
-                }
+            if (position.coords.speed) {
+                document.querySelector('#speed').textContent = position.coords.speed.toFixed(1);
             }
-
-            this.#position = position;
-
-            document.querySelector('#speed2').textContent = position.coords.speed;
         }
 
         setHR(str) {
