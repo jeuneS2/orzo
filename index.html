@@ -157,6 +157,15 @@
       </table>
     </div>
     <script>
+    class TrackPoint {
+        position
+        hr
+        constructor(position, hr) {
+            this.position = position;
+            this.hr = hr;
+        }
+    }
+
     class Orzo {
         #state // INITIAL, RUNNING, PAUSED, STOPPED
 
@@ -168,6 +177,10 @@
 
         #position
         #distance
+
+        #hr
+
+        #track
 
         #timerID
 
@@ -187,11 +200,15 @@
             this.#state = 'INITIAL';
             this.#showMenu = false;
 
+            this.#track = [];
+
             this.#timerID = setInterval(this.onTimerTick, 1000);
             this.onTimerTick();
         }
 
         setup() {
+            this.updateButtons(this.#state);
+
             document.querySelector('#page').addEventListener('click', this.doPageToggle);
             document.querySelector('#connect').addEventListener('click', this.doScan);
             document.querySelector('#startstop').addEventListener('click', this.doStartStop);
@@ -284,6 +301,26 @@
             }
         }
 
+        formatTrack() {
+            var content = "<gpx creator=\"orzo\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\" version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\" xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\">\n";
+            content += "  <trk>\n"
+
+            for (const track of this.#track) {
+                content += "    <trkseg>\n"
+                for (const t of track) {
+                    content += `      <trkpt lat=\"${t.position.coords.latitude}\" lon=\"${t.position.coords.longitude}\">\n`;
+                    content += `        <time>${new Date(t.position.timestamp).toISOString()}</time>\n`;
+                    content += `      </trkpt>\n`;
+                }
+                content += "    </trkseg>\n"
+            }
+
+            content += "  </trk>\n"
+            content += "</gpx>\n"
+
+            return content;
+        }
+
         doStartStop() {
             var transitions = {
                 'INITIAL': 'RUNNING',
@@ -304,8 +341,8 @@
                 this.deactivate();
                 break;
             case 'INITIAL':
+                var content = this.formatTrack();
                 var name = this.#startDate.toISOString() + ".gpx";
-                var content = "TBD";
                 var file = new Blob([content], {type: 'application/gpx+xml'});
                 var a = document.createElement('a');
                 a.setAttribute("href", window.URL.createObjectURL(file));
@@ -341,6 +378,7 @@
 
         activate() {
             this.#activeDate = new Date();
+            this.#track.push([]);
         }
 
         deactivate() {
@@ -437,7 +475,7 @@
                 this.setSpeed("n/a");
             }
 
-            if (this.#position) {
+            if (this.#state == 'RUNNING' && this.#position) {
                 const toRad = angle => (Math.PI / 180) * angle;
 
                 const lng1 = toRad(this.#position.coords.longitude);
@@ -462,6 +500,11 @@
                 this.setDistance(this.#distance.toFixed(2));
             }
             this.#position = position;
+
+            if (this.#state == 'RUNNING') {
+                var segment = this.#track[this.#track.length-1];
+                segment.push(new TrackPoint(this.#position, this.#hr));
+            }
         }
 
         setHR(str) {
@@ -474,6 +517,8 @@
 
         onHRMNotify(event) {
             const hr = event.target.value.getUint8(1);
+
+            this.#hr = hr;
 
             this.setHR(hr);
         }
