@@ -210,7 +210,6 @@
             if (this.#state != 'INITIAL') {
                 return "Are you sure you want to leave?";
             }
-            return "";
         }
 
         doPageToggle() {
@@ -305,9 +304,9 @@
                 this.deactivate();
                 break;
             case 'INITIAL':
-                var name = "test.gpx";
+                var name = this.#startDate.toISOString() + ".gpx";
                 var content = "TBD";
-                var file = new Blob([content], {type: 'text/plain'});
+                var file = new Blob([content], {type: 'application/gpx+xml'});
                 var a = document.createElement('a');
                 a.setAttribute("href", window.URL.createObjectURL(file));
                 a.setAttribute("download", name);
