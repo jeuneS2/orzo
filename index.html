@@ -52,6 +52,9 @@
           display: none;
       }
 
+      .suffix {
+          font-size: 6cqw;
+      }
       .battery {
           font-size: 6cqw;
       }
@@ -117,9 +120,16 @@
           </tr>
           <tr>
             <td class="flex">
-              speed
+              speed<span class="suffix">GPS</span>
               <div style="flex: 1"></div>
               <span id='speed'>n/a</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
+              distance<span class="suffix">GPS</span>
+              <div style="flex: 1"></div>
+              <span id='distance'>n/a</span>
             </td>
           </tr>
           <tr>
@@ -156,9 +166,13 @@
         #activeDate
         #activeTime
 
+        #position
+        #distance
+
         #timerID
 
         constructor() {
+            this.onBeforeUnload = this.onBeforeUnload.bind(this);
             this.doPageToggle = this.doPageToggle.bind(this);
             this.doScan = this.doScan.bind(this);
             this.doStartStop = this.doStartStop.bind(this);
@@ -189,9 +203,14 @@
             const locationOptions = { enableHighAccuracy: true };
             navigator.geolocation.watchPosition(this.onPositionChanged, undefined, locationOptions);
 
-            window.onbeforeunload = function() {
+            window.onbeforeunload = this.onBeforeUnload;
+        }
+
+        onBeforeUnload() {
+            if (this.#state != 'INITIAL') {
                 return "Are you sure you want to leave?";
-            };
+            }
+            return "";
         }
 
         doPageToggle() {
@@ -403,10 +422,47 @@
             this.setTime(this.timeToString(new Date(now)));
         }
 
+        setSpeed(str) {
+            document.querySelector('#speed').textContent = str;
+        }
+
+        setDistance(str) {
+            document.querySelector('#distance').textContent = str;
+        }
+
         onPositionChanged(position) {
             if (position.coords.speed) {
-                document.querySelector('#speed').textContent = position.coords.speed.toFixed(1);
+                const kph = position.coords.speed * 3.6;
+                this.setSpeed(kph.toFixed(1));
+            } else {
+                this.setSpeed("n/a");
             }
+
+            if (this.#position) {
+                const toRad = angle => (Math.PI / 180) * angle;
+
+                const lng1 = toRad(this.#position.coords.longitude);
+                const lat1 = toRad(this.#position.coords.latitude);
+                const lng2 = toRad(position.coords.longitude);
+                const lat2 = toRad(position.coords.latitude);
+
+                const radius = 6371; // Mean radius of the earth
+
+                const haversinDeltaLat = Math.pow(Math.sin((lat2 - lat1)/2), 2);
+                const haversinDeltaLng = Math.pow(Math.sin((lng2 - lng1)/2), 2);
+                const cosLat1 = Math.cos(lat1);
+                const cosLat2 = Math.cos(lat2);
+
+                const dist = 2 * radius * Math.asin(Math.sqrt(haversinDeltaLat + cosLat1*cosLat2*haversinDeltaLng));
+
+                if (this.#distance) {
+                    this.#distance += dist;
+                } else {
+                    this.#distance = dist;
+                }
+                this.setDistance(this.#distance.toFixed(2));
+            }
+            this.#position = position;
         }
 
         setHR(str) {
