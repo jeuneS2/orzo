@@ -117,30 +117,30 @@
           </tr>
           <tr>
             <td class="flex">
+              speed
+              <div style="flex: 1"></div>
+              <span id='speed'>n/a</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="flex">
               active
               <div style="flex: 1"></div>
-              <span id='active'> - </span>
+              <span id='active'></span>
             </td>
           </tr>
           <tr>
             <td class="flex">
               elapsed
               <div style="flex: 1"></div>
-              <span id='elapsed'> - </span>
+              <span id='elapsed'></span>
             </td>
           </tr>
           <tr>
             <td class="flex">
               time
               <div style="flex: 1"></div>
-              <span id='time'> - </span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              speed
-              <div style="flex: 1"></div>
-              <span id='speed'>n/a</span>
+              <span id='time'></span>
             </td>
           </tr>
         </tbody>
@@ -171,10 +171,11 @@
             this.onHRMNotify = this.onHRMNotify.bind(this);
             this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
 
-            this.#timerID = setInterval(this.onTimerTick, 1000);
             this.#started = false;
             this.#active = false;
             this.#showMenu = false;
+            this.#timerID = setInterval(this.onTimerTick, 1000);
+            this.onTimerTick();
         }
 
         setup() {
