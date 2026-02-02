@@ -267,7 +267,7 @@
                     const battery = (await characteristic.readValue()).getUint8(0);
                     this.setHRMBat(battery + '%');
 
-                    characteristic.addEventListener('characteristicvaluechanged', this.HRMonBatteryChange);
+                    characteristic.addEventListener('characteristicvaluechanged', this.onHRMBatteryChange);
                     await characteristic.startNotifications();
                 } catch(err) {
                     // just ignore errors
