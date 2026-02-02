@@ -83,19 +83,13 @@
               <button id='page'>menu</button>
               <div style="flex: 1"></div>
               <button id='connect'>sensors</button>
-              <div style="flex: 1"></div>
-              <button id='startstop'>start</button>
-              <div style="flex: 1"></div>
-              <button id='pauseunpause' disabled>play_arrow</button>
-              <div style="flex: 1"></div>
-              <button id='fullscreen'>fullscreen</button>
             </td>
           </tr>
         </thead>
         <tbody id="menu">
           <tr>
             <td class="flex">
-              orzo 0.0.0
+              orzo-hrmonly 0.0.0
             </td>
           </tr>
           <tr>
@@ -105,7 +99,7 @@
           </tr>
           <tr>
             <td class="flex">
-              <span class="copyright">Copyright &copy; 2024 Wolfgang Puffitsch</span>
+              <span class="copyright">Copyright &copy; 2026 Wolfgang Puffitsch</span>
             </td>
           </tr>
         </tbody>
@@ -118,115 +112,30 @@
               <span id='hr'>n/a</span>
             </td>
           </tr>
-          <tr>
-            <td class="flex">
-              speed<span class="suffix">GPS</span>
-              <div style="flex: 1"></div>
-              <span id='speed'>n/a</span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              distance<span class="suffix">GPS</span>
-              <div style="flex: 1"></div>
-              <span id='distance'>n/a</span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              active
-              <div style="flex: 1"></div>
-              <span id='active'></span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              elapsed
-              <div style="flex: 1"></div>
-              <span id='elapsed'></span>
-            </td>
-          </tr>
-          <tr>
-            <td class="flex">
-              time
-              <div style="flex: 1"></div>
-              <span id='time'></span>
-            </td>
-          </tr>
         </tbody>
       </table>
     </div>
     <script>
-    class TrackPoint {
-        position
-        hr
-        constructor(position, hr) {
-            this.position = position;
-            this.hr = hr;
-        }
-    }
 
     class Orzo {
-        #state // INITIAL, RUNNING, PAUSED, STOPPED
-
         #showMenu
 
-        #startDate
-        #activeDate
-        #activeTime
-
-        #position
-        #distance
-
         #hr
-
-        #track
-
-        #timerID
 
         constructor() {
             this.onBeforeUnload = this.onBeforeUnload.bind(this);
             this.doPageToggle = this.doPageToggle.bind(this);
             this.doScan = this.doScan.bind(this);
-            this.doStartStop = this.doStartStop.bind(this);
-            this.doPauseUnpause = this.doPauseUnpause.bind(this);
-            this.doFullScreen = this.doFullScreen.bind(this);
-            this.onFullScreenChanged = this.onFullScreenChanged.bind(this);
             this.onTimerTick = this.onTimerTick.bind(this);
-            this.onPositionChanged = this.onPositionChanged.bind(this);
             this.onHRMNotify = this.onHRMNotify.bind(this);
             this.onHRMBatteryChange = this.onHRMBatteryChange.bind(this);
 
-            this.#state = 'INITIAL';
             this.#showMenu = false;
-
-            this.#track = [];
-
-            this.#timerID = setInterval(this.onTimerTick, 1000);
-            this.onTimerTick();
         }
 
         setup() {
-            this.updateButtons(this.#state);
-
             document.querySelector('#page').addEventListener('click', this.doPageToggle);
             document.querySelector('#connect').addEventListener('click', this.doScan);
-            document.querySelector('#startstop').addEventListener('click', this.doStartStop);
-            document.querySelector('#pauseunpause').addEventListener('click', this.doPauseUnpause);
-
-            document.querySelector('#fullscreen').addEventListener('click', this.doFullScreen);
-            document.addEventListener("fullscreenchange", this.onFullScreenChanged);
-
-            const locationOptions = { enableHighAccuracy: true };
-            navigator.geolocation.watchPosition(this.onPositionChanged, undefined, locationOptions);
-
-            window.onbeforeunload = this.onBeforeUnload;
-        }
-
-        onBeforeUnload() {
-            if (this.#state != 'INITIAL') {
-                return "Are you sure you want to leave?";
-            }
         }
 
         doPageToggle() {
@@ -273,237 +182,6 @@
                     // just ignore errors
                 }
 
-            }
-        }
-
-        updateButtons(state) {
-            switch (state) {
-            case 'INITIAL':
-                document.querySelector('#startstop').textContent = 'start';
-                document.querySelector('#pauseunpause').textContent = 'play_arrow';
-                document.querySelector('#pauseunpause').disabled = true;
-                break;
-            case 'RUNNING':
-                document.querySelector('#startstop').textContent = 'stop';
-                document.querySelector('#pauseunpause').textContent = 'pause';
-                document.querySelector('#pauseunpause').disabled = false;
-                break;
-            case 'PAUSED':
-                document.querySelector('#startstop').textContent = 'stop';
-                document.querySelector('#pauseunpause').textContent = 'play_arrow';
-                document.querySelector('#pauseunpause').disabled = false;
-                break;
-            case 'STOPPED':
-                document.querySelector('#startstop').textContent = 'done';
-                document.querySelector('#pauseunpause').textContent = 'play_arrow';
-                document.querySelector('#pauseunpause').disabled = false;
-                break;
-            }
-        }
-
-        formatTrack() {
-            var content = "<gpx creator=\"orzo\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\" version=\"1.1\" xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\" xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\">\n";
-            content += "  <trk>\n"
-
-            for (const track of this.#track) {
-                content += "    <trkseg>\n"
-                for (const t of track) {
-                    content += `      <trkpt lat=\"${t.position.coords.latitude}\" lon=\"${t.position.coords.longitude}\">\n`;
-                    content += `        <time>${new Date(t.position.timestamp).toISOString()}</time>\n`;
-                    content += `      </trkpt>\n`;
-                }
-                content += "    </trkseg>\n"
-            }
-
-            content += "  </trk>\n"
-            content += "</gpx>\n"
-
-            return content;
-        }
-
-        doStartStop() {
-            var transitions = {
-                'INITIAL': 'RUNNING',
-                'RUNNING': 'STOPPED',
-                'PAUSED':  'STOPPED',
-                'STOPPED': 'INITIAL'
-            };
-
-            this.#state = transitions[this.#state];
-
-            switch (this.#state) {
-            case 'RUNNING':
-                this.#startDate = new Date();
-                this.#activeTime = 0;
-                this.activate();
-                break;
-            case 'STOPPED':
-                this.deactivate();
-                break;
-            case 'INITIAL':
-                var content = this.formatTrack();
-                var name = this.#startDate.toISOString() + ".gpx";
-                var file = new Blob([content], {type: 'application/gpx+xml'});
-                var a = document.createElement('a');
-                a.setAttribute("href", window.URL.createObjectURL(file));
-                a.setAttribute("download", name);
-                a.click();
-                break;
-            }
-
-            this.updateButtons(this.#state);
-        }
-
-        doPauseUnpause() {
-            var transitions = {
-                'INITIAL': 'INITIAL',
-                'RUNNING': 'PAUSED',
-                'PAUSED':  'RUNNING',
-                'STOPPED': 'RUNNING'
-            };
-
-            this.#state = transitions[this.#state];
-
-            switch (this.#state) {
-            case 'RUNNING':
-                this.activate();
-                break;
-            case 'PAUSED':
-                this.deactivate();
-                break;
-            }
-
-            this.updateButtons(this.#state);
-        }
-
-        activate() {
-            this.#activeDate = new Date();
-            this.#track.push([]);
-        }
-
-        deactivate() {
-            this.#activeTime += new Date() - this.#activeDate;
-        }
-
-        doFullScreen() {
-            let elem = document.querySelector("html");
-
-            if (!document.fullscreenElement) {
-                document.querySelector('#fullscreen').textContent = 'fullscreen_exit';
-
-                elem.requestFullscreen();
-            } else {
-                document.querySelector('#fullscreen').textContent = 'fullscreen';
-
-                document.exitFullscreen();
-            }
-        }
-
-        onFullScreenChanged() {
-            if (!document.fullscreenElement) {
-                document.querySelector('#fullscreen').textContent = 'fullscreen';
-            } else {
-                document.querySelector('#fullscreen').textContent = 'fullscreen_exit';
-            }
-        }
-
-        setActive(str) {
-            document.querySelector('#active').textContent = str;
-        }
-
-        setElapsed(str) {
-            document.querySelector('#elapsed').textContent = str;
-        }
-
-        timeDiffToString(time) {
-            const seconds = time.getUTCSeconds();
-            const minutes = time.getUTCMinutes();
-            const hours = time.getUTCHours();
-
-            if (hours > 0) {
-                return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
-            } else if (minutes > 0) {
-                return minutes.toString() + ":" + seconds.toString().padStart(2, "0");
-            } else {
-                return seconds;
-            }
-        }
-
-        setTime(str) {
-            document.querySelector('#time').textContent = str;
-        }
-
-        timeToString(time) {
-            const seconds = time.getSeconds();
-            const minutes = time.getMinutes();
-            const hours = time.getHours();
-
-            return hours.toString() + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
-        }
-
-        onTimerTick() {
-            const now = Date.now();
-
-            if (this.#state == 'RUNNING') {
-                const diff = now - this.#activeDate;
-
-                this.setActive(this.timeDiffToString(new Date(this.#activeTime + diff)));
-            }
-
-            if (this.#state == 'RUNNING' || this.#state == 'PAUSED') {
-                const diff = now - this.#startDate;
-
-                this.setElapsed(this.timeDiffToString(new Date(diff)));
-            }
-
-            this.setTime(this.timeToString(new Date(now)));
-        }
-
-        setSpeed(str) {
-            document.querySelector('#speed').textContent = str;
-        }
-
-        setDistance(str) {
-            document.querySelector('#distance').textContent = str;
-        }
-
-        onPositionChanged(position) {
-            if (position.coords.speed) {
-                const kph = position.coords.speed * 3.6;
-                this.setSpeed(kph.toFixed(1));
-            } else {
-                this.setSpeed("n/a");
-            }
-
-            if (this.#state == 'RUNNING' && this.#position) {
-                const toRad = angle => (Math.PI / 180) * angle;
-
-                const lng1 = toRad(this.#position.coords.longitude);
-                const lat1 = toRad(this.#position.coords.latitude);
-                const lng2 = toRad(position.coords.longitude);
-                const lat2 = toRad(position.coords.latitude);
-
-                const radius = 6371; // Mean radius of the earth
-
-                const haversinDeltaLat = Math.pow(Math.sin((lat2 - lat1)/2), 2);
-                const haversinDeltaLng = Math.pow(Math.sin((lng2 - lng1)/2), 2);
-                const cosLat1 = Math.cos(lat1);
-                const cosLat2 = Math.cos(lat2);
-
-                const dist = 2 * radius * Math.asin(Math.sqrt(haversinDeltaLat + cosLat1*cosLat2*haversinDeltaLng));
-
-                if (this.#distance) {
-                    this.#distance += dist;
-                } else {
-                    this.#distance = dist;
-                }
-                this.setDistance(this.#distance.toFixed(2));
-            }
-            this.#position = position;
-
-            if (this.#state == 'RUNNING') {
-                var segment = this.#track[this.#track.length-1];
-                segment.push(new TrackPoint(this.#position, this.#hr));
             }
         }
 
